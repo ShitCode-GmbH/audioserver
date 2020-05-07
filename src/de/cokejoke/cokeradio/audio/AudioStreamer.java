@@ -1,5 +1,6 @@
 package de.cokejoke.cokeradio.audio;
 
+import java.io.File;
 import java.io.IOException;
 
 import de.cokejoke.cokeradio.network.AudioServer;
@@ -56,13 +57,20 @@ public class AudioStreamer implements Runnable {
 	}
 
 	public void nextSong() {
-		if (songProvider != null) {
-			Song next = songProvider.getNext();
+		if (songProvider == null) {
+			System.out.println("No song provider set, defaulting to hardcoded file on desktop :)");
+			File file = new File(System.getProperty("user.home") + "/Desktop/Test.mp3");
+			if (!file.exists()) {
+				// 404 - file not found, i guess
+				System.exit(404);
+			}
+			Song next = new Song(file, file.getName(), file.length(), 192);
 			this.play(next);
-		} else {
-			Song next = Song.next();
-			this.play(next);
+			return;
 		}
+		
+		Song next = songProvider.getNext();
+		this.play(next);
 	}
 
 	public void play(Song song) {
